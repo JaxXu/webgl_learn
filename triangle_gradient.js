@@ -50,13 +50,34 @@ context.linkProgram(program);
 context.useProgram(program);
 
 
-// 绑定 a_Position 到 buffer
+// // =========================== 多 Buffer ============================
+// const pointsBuffer = context.createBuffer();
+// context.bindBuffer(context.ARRAY_BUFFER, pointsBuffer);
+// const a_Position = context.getAttribLocation(program, 'a_Position');
+// context.enableVertexAttribArray(a_Position);
+// context.vertexAttribPointer(a_Position, 2, context.FLOAT, false, 0, 0);
+//
+// const colorsBuffer = context.createBuffer();
+// context.bindBuffer(context.ARRAY_BUFFER, colorsBuffer);
+// const a_Color = context.getAttribLocation(program, 'a_Color');
+// context.enableVertexAttribArray(a_Color);
+// context.vertexAttribPointer(a_Color, 4, context.FLOAT, false, 0, 0);
+// // =========================== 多 Buffer ============================
+
+
+// =========================== 单 Buffer ============================
 const buffer = context.createBuffer();
 context.bindBuffer(context.ARRAY_BUFFER, buffer);
 
 const a_Position = context.getAttribLocation(program, 'a_Position');
 context.enableVertexAttribArray(a_Position);
-context.vertexAttribPointer(a_Position, 2, context.FLOAT, false, 0, 0);
+context.vertexAttribPointer(a_Position, 2, context.FLOAT, false, 24, 0);
+
+const a_Color = context.getAttribLocation(program, 'a_Color');
+context.enableVertexAttribArray(a_Color);
+context.vertexAttribPointer(a_Color, 4, context.FLOAT, false, 24, 8); // todo stride 表示单个顶点信息所占用的字节数 , offset 偏移字节数
+
+// =========================== 单 Buffer ============================
 
 // 转换到 NDC 坐标
 const a_Screen_Size = context.getAttribLocation(program, 'a_Screen_Size');
@@ -64,21 +85,58 @@ context.vertexAttrib2f(a_Screen_Size, element.width, element.height);
 
 
 const positions = [];
+const colors = [];
 element.addEventListener('mouseup', evt => {
     const pageX = evt.pageX;
     const pageY = evt.pageY;
+
+    // // =========================== 多 Buffer ============================
+    // positions.push(
+    //     pageX, pageY,
+    // );
+    // colors.push(
+    //     Math.ceil(Math.random() * 255),
+    //     Math.ceil(Math.random() * 255),
+    //     Math.ceil(Math.random() * 255),
+    //     1
+    // );
+    //
+    // if(positions.length % 18 === 0) {
+    //
+    //     context.bindBuffer(context.ARRAY_BUFFER, pointsBuffer);
+    //     context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.DYNAMIC_DRAW);
+    //
+    //     context.bindBuffer(context.ARRAY_BUFFER, colorsBuffer);
+    //     context.bufferData(context.ARRAY_BUFFER, new Float32Array(colors), context.DYNAMIC_DRAW);
+    //
+    //     // 清除画布
+    //     context.clearColor(0.0, 0.0, 0.0, 1.0);
+    //     context.clear(context.COLOR_BUFFER_BIT);
+    //
+    //     if (positions.length % 6 === 0) {
+    //         context.drawArrays(context.TRIANGLES, 0, positions.length / 2);
+    //     }
+    // }
+    // // =========================== 多 Buffer ============================
+
+    // =========================== 单 Buffer ============================
     positions.push(
-        pageX, pageY,
+        // 顶点坐标
+        pageX,
+        pageY,
+
+        // 颜色信息
+        Math.ceil(Math.random() * 255),
+        Math.ceil(Math.random() * 255),
+        Math.ceil(Math.random() * 255),
+        1
     );
-
-    if(positions.length % 6 === 0) {
-
-        context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.DYNAMIC_DRAW);
-
+    if (positions.length % 18 === 0) {
         // 清除画布
         context.clearColor(0.0, 0.0, 0.0, 1.0);
         context.clear(context.COLOR_BUFFER_BIT);
-
-        context.drawArrays(context.TRIANGLES, 0, positions.length / 2);
+        context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
+        context.drawArrays(context.TRIANGLES, 0, positions.length / 6);
     }
+    // =========================== 单 Buffer ============================
 })
